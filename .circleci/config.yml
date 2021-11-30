@@ -66,11 +66,11 @@ jobs:
           command: |
             docker build \
             -t walnut .
-      - run: docker tag walnut:latest $ECR_REPO_PRODUCTION:$CIRCLE_BUILD_NUM
-      - run: docker push $ECR_REPO_PRODUCTION:$CIRCLE_BUILD_NUM
-      - run: ecs deploy -t $CIRCLE_BUILD_NUM $AWS_CLUSTER_PRODUCTION $AWS_SERVICE_PRODUCTION --timeout $AWS_TIMEOUT
-      - run: ecs deploy -t $CIRCLE_BUILD_NUM $AWS_CLUSTER_PRODUCTION $AWS_SERVICE_CELERY_PRODUCTION --timeout $AWS_TIMEOUT
-      - run: ecs deploy -t $CIRCLE_BUILD_NUM $AWS_CLUSTER_PRODUCTION $AWS_SERVICE_CELERYBEAT_PRODUCTION --timeout $AWS_TIMEOUT
+      - run: docker tag walnut:latest $ECR_REPO_PRODUCTION:production
+      - run: docker push $ECR_REPO_PRODUCTION:production
+      - run: ecs deploy -t production $AWS_CLUSTER_PRODUCTION $AWS_SERVICE_PRODUCTION --timeout $AWS_TIMEOUT
+      - run: ecs deploy -t production $AWS_CLUSTER_PRODUCTION $AWS_SERVICE_CELERY_PRODUCTION --timeout $AWS_TIMEOUT
+      - run: ecs deploy -t production $AWS_CLUSTER_PRODUCTION $AWS_SERVICE_CELERYBEAT_PRODUCTION --timeout $AWS_TIMEOUT
 
 workflows:
   version: 2
