@@ -1,0 +1,89 @@
+defaults: &defaults
+  working_directory: ~/repo
+  docker:
+    - image: circleci/python:3.7
+    - image: circleci/postgres:12
+      environment:
+        - POSTGRES_USER=ubuntu
+        - POSTGRES_DB=db_name
+        - POSTGRES_PASSWORD=password
+    - image: localstack/localstack:0.11.4
+      ports:
+        - "4566:4566"
+      environment:
+        - SERVICES=s3
+        - DEFAULT_REGION=us-east-1
+jobs:
+  build:
+    <<: *defaults
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "requirements.txt" }}
+            - v1-dependencies-
+      - run:
+          command: |
+            python3 -m venv venv
+            . venv/bin/activate
+            pip install --upgrade pip
+            pip install -r requirements.txt
+      - save_cache:
+          paths:
+            - ./venv
+          key: v1-dependencies-{{ checksum "requirements.txt" }}
+      - run:
+          command: |
+            . venv/bin/activate
+            pip install coverage mock
+      - run:
+          command: |
+            . venv/bin/activate
+            coverage run --omit 'venv/*' --branch --source . manage.py test
+          environment:
+            ENVIRONMENT: "test"
+            DATABASE_URL: "postgres://ubuntu:password@localhost:5432/db_name"
+      - run:
+          command: |
+            . venv/bin/activate
+            coverage html -d coverage-reports
+      - store_artifacts:
+          path: coverage-reports/
+
+  deploy-production:
+    <<: *defaults
+    steps:
+      - checkout
+      - setup_remote_docker
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "requirements.txt" }}
+      - run: sudo pip install ecs-deploy awscli
+      - run: eval $(aws ecr get-login --region $AWS_DEFAULT_REGION --no-include-email | sed 's|https://||')
+      - run: echo 'export VERSION="'$(date +%Y-%m-%dT%H:%M:%S)'"' >> $BASH_ENV; source $BASH_ENV
+      - run:
+          name: build
+          command: |
+            docker build \
+            -t walnut .
+      - run: docker tag walnut:latest $ECR_REPO_PRODUCTION:$CIRCLE_TAG
+      - run: docker push $ECR_REPO_PRODUCTION:$CIRCLE_TAG
+      - run: ecs deploy -t $CIRCLE_TAG $AWS_CLUSTER_PRODUCTION $AWS_SERVICE_PRODUCTION --timeout $AWS_TIMEOUT
+      - run: ecs deploy -t $CIRCLE_TAG $AWS_CLUSTER_PRODUCTION $AWS_SERVICE_CELERY_PRODUCTION --timeout $AWS_TIMEOUT
+      - run: ecs deploy -t $CIRCLE_TAG $AWS_CLUSTER_PRODUCTION $AWS_SERVICE_CELERYBEAT_PRODUCTION --timeout $AWS_TIMEOUT
+
+workflows:
+  version: 2
+  build_test_deploy:
+    jobs:
+      - build:
+          filters:
+            tags:
+              only: /v[0-9]+(\.[0-9]+)*/
+      - deploy-production:
+          filters:
+            branches:
+              only:
+                - main
+          requires:
+            - build
