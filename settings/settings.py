@@ -5,6 +5,7 @@
 import os
 import dj_database_url
 from pathlib import Path
+from s3_environ import S3Environ
 
 import dotenv
 
@@ -13,12 +14,20 @@ import dotenv
 # Enviroment
 ###
 
-ENVIRONMENT = os.environ.get('ENVIRONMENT', 'development')
-
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
-
+###
+# Get data from .env file
+###
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 dotenv.read_dotenv(os.path.join(BASE_DIR, '.env'))
+
+ENVIRONMENT = os.environ.get('ENVIRONMENT')
+LOAD_ENVS_FROM_FILE = True if os.environ.get('LOAD_ENVS_FROM_FILE', False) == 'True' else False
+
+env_file = 'envs-production.json'
+if not LOAD_ENVS_FROM_FILE:
+    S3Environ(bucket='walnut-envs', key=env_file)
+    print("Loading envs from S3: {0}".format(env_file))
+
 
 
 ###
