@@ -70,7 +70,6 @@ jobs:
       - run: docker push $ECR_REPO_PRODUCTION:production
       - run: ecs deploy -t production $AWS_CLUSTER_PRODUCTION $AWS_SERVICE_PRODUCTION --timeout $AWS_TIMEOUT
       - run: ecs deploy -t production $AWS_CLUSTER_PRODUCTION $AWS_SERVICE_CELERY_PRODUCTION --timeout $AWS_TIMEOUT
-      - run: ecs deploy -t production $AWS_CLUSTER_PRODUCTION $AWS_SERVICE_CELERYBEAT_PRODUCTION --timeout $AWS_TIMEOUT
 
 workflows:
   version: 2
