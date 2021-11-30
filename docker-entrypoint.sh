@@ -13,7 +13,6 @@ elif [ "$1" = "celery" ]; then
 
 else
     python manage.py migrate                  # Apply database migrations
-    python manage.py collectstatic --noinput  # Collect static files
 
     touch /usr/src/logs/gunicorn.log
     touch /usr/src/logs/access.log
