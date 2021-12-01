@@ -12,6 +12,7 @@ elif [ "$1" = "celery" ]; then
     exec celery -A settings worker -l INFO -Q "$@"
 
 else
+    python manage.py collectstatic --noinput  # Collect static files
     python manage.py migrate                  # Apply database migrations
 
     touch /usr/src/logs/gunicorn.log
