@@ -39,6 +39,10 @@ DEBUG = ENVIRONMENT == 'development' or os.environ.get('DEBUG', False)
 
 ALLOWED_HOSTS = [
     'localhost',
+
+    #aws
+    '.sa-east-1.elb.amazonaws.com',
+    '.compute-1.amazonaws.com'
 ]
 
 ###
