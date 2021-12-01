@@ -3,8 +3,8 @@
 ###
 
 import os
+import requests
 import dj_database_url
-from pathlib import Path
 from s3_environ import S3Environ
 
 import dotenv
@@ -44,6 +44,18 @@ ALLOWED_HOSTS = [
     '.us-east-1.elb.amazonaws.com',
     '.compute-1.amazonaws.com'
 ]
+
+EC2_PRIVATE_IP = None
+try:
+    EC2_PRIVATE_IP = requests.get(
+        'http://169.254.169.254/latest/meta-data/local-ipv4',
+        timeout=0.01,
+    ).text
+except requests.exceptions.RequestException:
+    pass
+
+if EC2_PRIVATE_IP:
+    ALLOWED_HOSTS.append(EC2_PRIVATE_IP)
 
 ###
 # Application definition
