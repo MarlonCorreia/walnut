@@ -23,6 +23,7 @@ dj_database_url==0.5.0
 
 # Server
 gunicorn==20.0.4
+whitenoise==5.0.1
 
 # Video converter
 python-ffmpeg-video-streaming==0.1.14
