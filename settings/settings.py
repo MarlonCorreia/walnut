@@ -135,10 +135,6 @@ DATABASES = {'default': dj_database_url.parse(DATABASE_URL)}
 DATABASES['default']['ATOMIC_REQUESTS'] = True
 
 ###
-# Celery
-###
-
-###
 # Celery and Redis
 ###
 
@@ -192,6 +188,7 @@ USE_TZ = True
 ###
 
 STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'static_root')
 
 ###
 # Defaults primary key field type
