@@ -41,7 +41,7 @@ ALLOWED_HOSTS = [
     'localhost',
 
     #aws
-    '.sa-east-1.elb.amazonaws.com',
+    '.us-east-1.elb.amazonaws.com',
     '.compute-1.amazonaws.com'
 ]
 
