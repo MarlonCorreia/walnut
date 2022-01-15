@@ -8,6 +8,8 @@ from urllib.request import urlretrieve
 import ffmpeg_streaming as ffmpeg
 from ffmpeg_streaming import Formats, FFProbe
 
+from helpers.utils import create_dir
+
 
 class FFMPeg():
     """
@@ -55,9 +57,13 @@ class FFMPeg():
         return self.meta_data.format().get("duration", 0)        
 
     def _download_video(self):
-        os.mkdir(self.video_dir)
-        os.mkdir(f'{self.video_dir}/dash')
-        os.mkdir(f'{self.video_dir}/hls')
+        create_dir(self.video_dir, multiple=True)
+        create_dir(f'{self.video_dir}/dash')
+        create_dir(f'{self.video_dir}/hls')
+        
+        try:
+            data = urlretrieve(self.video_url, f'{self.video_dir}/{self.video_uuid}.mp4')
+        except:
+            pass
 
-        data = urlretrieve(self.video_url, f'{self.video_dir}/{self.video_uuid}.mp4')
         return data[0]

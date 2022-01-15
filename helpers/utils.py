@@ -16,8 +16,11 @@ from urllib import request
 # Utils
 ###
 
-def create_dir(dir):
-    os.mkdir(dir)
+def create_dir(dir, multiple=False):
+    if not os.path.exists(dir):
+        if multiple:
+            os.makedirs(dir)
+        os.mkdir(dir)
 
 def delete_dir(dir):
     shutil.rmtree(dir)

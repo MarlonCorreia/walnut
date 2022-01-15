@@ -34,7 +34,12 @@ class VideoViewSet(viewsets.GenericViewSet,
             serializer.is_valid(raise_exception=True)
             content = serializer.save(user=request.user, status='Running')
 
-            process_video.delay(content.id, serializer.validated_data.get('aws_credentials'))
+            process_video.delay(video_id=content.id, 
+                                video_uuid=content.uuid,
+                                video_source=content.video_source, 
+                                use_hls=content.use_hls,
+                                use_dash=content.use_dash,
+                                aws_credentials=serializer.validated_data.get('aws_credentials'))
             
             return Response(data=serializer.data, status=204)
 

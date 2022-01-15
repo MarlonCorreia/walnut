@@ -22,7 +22,7 @@ logger = logging.getLogger('amazon-logs')
 ###
 
 @shared_task
-def process_video(video_id, aws_credentials):
+def process_video(video_id, video_uuid, video_source, use_hls, use_dash,  aws_credentials):
     logger.info(f'Start video processing video id {video_id}')
     
     try:
@@ -31,20 +31,22 @@ def process_video(video_id, aws_credentials):
     except Exception as ex:
         raise ex
     try:
-        video = Video.objects.get(id=video_id)
-        video_dir = f'{BASE_DIR}/tmp/{video.uuid}/'
+        bucket = ""
+        video_dir = f'{BASE_DIR}/tmp/{video_uuid}/'
         
         try:
-            ffm = FFMPeg(video.uuid, video.video_source, video_dir, video.use_hls, video.use_dash)
+            ffm = FFMPeg(video_uuid, video_source, video_dir, use_hls, use_dash)
         except Exception as e:
             raise e
+        
+        video = Video.objects.get(id=video_id)
 
         dirs = []
-        if video.use_hls:
-            video.hls_file = f'https://{bucket}.s3.amazonaws.com/{video.uuid}/hls/{video.uuid}.m3u8' 
+        if use_hls:
+            video.hls_file = f'https://{bucket}.s3.amazonaws.com/{video_uuid}/hls/{video_uuid}.m3u8' 
             dirs.append(f'{video_dir}hls/')
         if video.use_dash:
-            video.dash_file = f'https://{bucket}.s3.amazonaws.com/{video.uuid}/dash/{video.uuid}.mpd'
+            video.dash_file = f'https://{bucket}.s3.amazonaws.com/{video_uuid}/dash/{video_uuid}.mpd'
             dirs.append(f'{video_dir}dash/')
 
         try:
